@@ -21,33 +21,52 @@ function AvatarModel({ model }) {
 export default function Avatar() {
   const avatarRef = useRef()
 
-  // Load model and animations safely. They suspend by default, so we wrap them in try/catch if preloading
-  let model = null
-  let idleAnims = []
-  let walkAnims = []
-  let waveAnims = []
+  const gltf = useGLTF('/models/avatar.glb')
+  const model = gltf.scene
 
-  try {
-    const gltf = useGLTF('/models/avatar.glb')
-    model = gltf.scene
-  } catch (e) {
-    console.warn("Avatar model missing, using placeholder.")
+  const idleG = useGLTF('/animations/idle.glb')
+  const walkG = useGLTF('/animations/walk.glb')
+  const waveG = useGLTF('/animations/wave.glb')
+
+  // Helper to rename and scale tracks from cm (Mixamo) to meters (Three.js)
+  const cleanTracks = (clip) => {
+    if (clip && clip.tracks) {
+      // Filter out scale tracks to prevent shrinking/deformation
+      clip.tracks = clip.tracks.filter(track => !track.name.endsWith('.scale'))
+
+      clip.tracks.forEach(track => {
+        // Rename track paths to match model's bones
+        track.name = track.name
+          .replace(/mixamorig:/g, '')
+          .replace(/mixamorig/g, '')
+
+        // Scale position tracks (e.g. Hips.position) from cm to meters
+        if (track.name.endsWith('.position')) {
+          for (let i = 0; i < track.values.length; i++) {
+            track.values[i] *= 0.01
+          }
+        }
+      })
+    }
+    return clip
   }
 
-  try {
-    const idleG = useGLTF('/animations/idle.glb')
-    idleAnims = idleG.animations
-  } catch (e) {}
-
-  try {
-    const walkG = useGLTF('/animations/walk.glb')
-    walkAnims = walkG.animations
-  } catch (e) {}
-
-  try {
-    const waveG = useGLTF('/animations/wave.glb')
-    waveAnims = waveG.animations
-  } catch (e) {}
+  // Safely rename animation clips to avoid collision and match exact state name
+  const idleAnims = (idleG.animations || []).map(clip => {
+    const c = cleanTracks(clip.clone())
+    c.name = 'Idle'
+    return c
+  })
+  const walkAnims = (walkG.animations || []).map(clip => {
+    const c = cleanTracks(clip.clone())
+    c.name = 'Walk'
+    return c
+  })
+  const waveAnims = (waveG.animations || []).map(clip => {
+    const c = cleanTracks(clip.clone())
+    c.name = 'Wave'
+    return c
+  })
 
   const allAnims = [...idleAnims, ...walkAnims, ...waveAnims]
   const { actions } = useAnimations(allAnims, avatarRef)

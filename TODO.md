@@ -28,14 +28,14 @@ Track the progress of building and deploying the Legendary 3D Portfolio.
 - [x] Add remote origin `KrishnaGaur7/Portfolio.git`
 - [x] Push completed codebase to GitHub
 
-## 🛠️ Phase 5: Local Testing & Assets (Pending - USER Action)
-- [ ] Run `npm install` inside the project folder
-- [ ] Run `npm run dev` to test interactive movements locally
-- [ ] Retarget Y-Bot animations on Mixamo.com and download GLB files
-- [ ] Replace temporary animation assets with real animations in `/public/animations/`:
-  - [ ] `idle.glb`
-  - [ ] `walk.glb`
-  - [ ] `wave.glb`
+## 🛠️ Phase 5: Local Testing & Assets (Completed ✅)
+- [x] Run `npm install` inside the project folder
+- [x] Run `npm run dev` to test interactive movements locally
+- [x] Retarget Y-Bot animations on Mixamo.com and download GLB files
+- [x] Replace temporary animation assets with real animations in `/public/animations/`:
+  - [x] `idle.glb`
+  - [x] `walk.glb`
+  - [x] `wave.glb`
 
 ## 🌐 Phase 6: Cloud Deployment (Pending - USER Action)
 - [ ] Connect repository to Vercel platform

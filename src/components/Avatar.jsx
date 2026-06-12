@@ -98,22 +98,37 @@ export default function Avatar() {
 
   useFrame((state, delta) => {
     if (!avatarRef.current) return
-    const { forward, backward, left, right } = getKeys()
+    const keys = getKeys()
+    const { forward, backward, left, right } = keys
     const moving = forward || backward || left || right
-    const speed  = 4
+    const speed = 4.5
 
     if (moving) {
       switchAnim('Walk')
-      if (forward)  avatarRef.current.position.z -= speed * delta
-      if (backward) avatarRef.current.position.z += speed * delta
-      if (left)     avatarRef.current.position.x -= speed * delta
-      if (right)    avatarRef.current.position.x += speed * delta
+      
+      let moveX = 0
+      let moveZ = 0
+      if (forward)  moveZ -= 1
+      if (backward) moveZ += 1
+      if (left)     moveX -= 1
+      if (right)    moveX += 1
 
-      // Face direction
-      if (forward)  avatarRef.current.rotation.y = 0
-      if (backward) avatarRef.current.rotation.y = Math.PI
-      if (left)     avatarRef.current.rotation.y = Math.PI / 2
-      if (right)    avatarRef.current.rotation.y = -Math.PI / 2
+      // Normalize diagonal movement speed
+      if (moveX !== 0 && moveZ !== 0) {
+        const length = Math.sqrt(moveX * moveX + moveZ * moveZ)
+        moveX /= length
+        moveZ /= length
+      }
+
+      const speed = 4.5
+      avatarRef.current.position.x += moveX * speed * delta
+      avatarRef.current.position.z += moveZ * speed * delta
+
+      // Smooth rotation towards movement direction
+      const targetAngle = Math.atan2(moveX, moveZ)
+      let diff = targetAngle - avatarRef.current.rotation.y
+      diff = Math.atan2(Math.sin(diff), Math.cos(diff)) // Normalize angle diff to -PI to PI
+      avatarRef.current.rotation.y += diff * 0.2 // Smooth lerp turning speed
     } else {
       switchAnim('Idle')
     }
